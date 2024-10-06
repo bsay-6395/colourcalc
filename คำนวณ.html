@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Minimal App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Athiti:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Athiti', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-family: 'Athiti', sans-serif;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        input {
+            font-family: 'Athiti', sans-serif;
+            width: fit-content;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            /* ทำให้กรอกได้เฉพาะตัวเลข */
+            -moz-appearance: textfield;
+        }
+        input::-webkit-inner-spin-button,
+        input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        button {
+            font-family: 'Athiti', sans-serif;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            font-family: 'Athiti', sans-serif;
+            font-size: 16px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>คำนวณสี</h1>
+        <label for="number">กรอกตัวเลขที่ต้องการคำนวณ:</label>
+        <input type="number" id="number" placeholder="กรอกตัวเลขที่ต้องการบวก" required>
+
+        <p>วันที่เริ่มต้น: <strong id="start-date"></strong></p>
+
+        <button onclick="calculate()">คำนวณผลลัพธ์</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // กำหนดชื่อวันในภาษาไทย
+        const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+
+        document.getElementById('start-date').textContent = new Date().toLocaleDateString('th-TH');
+
+        function calculate() {
+            const selectedNumber = parseInt(document.getElementById('number').value);
+            if (isNaN(selectedNumber)) {
+                alert("กรุณากรอกตัวเลขที่ถูกต้อง");
+                return;
+            }
+            let resultHtml = '';
+            const startDate = new Date();
+
+            for (let i = 0; i < 7; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const dayNumber = (currentDate.getDay() === 0) ? 0 : currentDate.getDay();
+                const dayOfMonth = currentDate.getDate();
+                let result = selectedNumber + dayOfMonth + (dayNumber + 1); // +1 เพื่อให้วันอาทิตย์เริ่มจาก 1
+
+                // เก็บผลลัพธ์แรก
+                const firstResult = result;
+
+                // ลดผลลัพธ์แรกเป็นหลักเดียวถ้าเป็นเลขสองหลัก
+                while (result >= 10) {
+                    result = result.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                }
+
+                // จัดการการแสดงผล
+                const formattedFirstResult = (firstResult === 13 || firstResult === 31) 
+                    ? `<span class="highlight">${firstResult}</span>` 
+                    : firstResult;
+
+                resultHtml += `วัน ${dayNames[dayNumber]} ${currentDate.toLocaleDateString('th-TH')} : <span class="bold">${formattedFirstResult} | ${result}</span><br>`;
+            }
+
+            document.getElementById('result').innerHTML = resultHtml;
+        }
+
+        // เพิ่มฟังก์ชันตรวจจับการกดปุ่ม Enter
+        document.getElementById('number').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculate();
+            }
+        });
+    </script>
+
+</body>
+</html>
