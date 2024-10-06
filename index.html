@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Minimal App</title>
+    <title>Calcolour</title>
     <link href="https://fonts.googleapis.com/css2?family=Athiti:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -32,22 +32,16 @@
         }
         input {
             font-family: 'Athiti', sans-serif;
-            width: fit-content;
+            width: 90%;
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 16px;
-            /* ทำให้กรอกได้เฉพาะตัวเลข */
-            -moz-appearance: textfield;
-        }
-        input::-webkit-inner-spin-button,
-        input::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
         }
         button {
             font-family: 'Athiti', sans-serif;
+            font-size: 16px;
             background-color: #28a745;
             color: white;
             border: none;
@@ -56,7 +50,6 @@
             border-radius: 5px;
             margin: 10px 0;
             width: 100%;
-            font-size: 16px;
         }
         button:hover {
             background-color: #218838;
@@ -72,7 +65,7 @@
             text-align: left;
         }
         .highlight {
-            color: red;
+            color: rgb(164, 14, 14);
             font-weight: bold;
         }
         .bold {
@@ -83,11 +76,12 @@
 <body>
 
     <div class="container">
-        <h1>คำนวณสี</h1>
+        <h1>My calculate colour</h1>
+        <label for="date">กรุณาเลือกวันที่:</label>
+        <input type="date" id="date" required>
+
         <label for="number">กรอกตัวเลขที่ต้องการคำนวณ:</label>
         <input type="number" id="number" placeholder="กรอกตัวเลขที่ต้องการบวก" required>
-
-        <p>วันที่เริ่มต้น: <strong id="start-date"></strong></p>
 
         <button onclick="calculate()">คำนวณผลลัพธ์</button>
 
@@ -98,42 +92,43 @@
         // กำหนดชื่อวันในภาษาไทย
         const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
-        document.getElementById('start-date').textContent = new Date().toLocaleDateString('th-TH');
-
         function calculate() {
+            const dateValue = document.getElementById('date').value;
             const selectedNumber = parseInt(document.getElementById('number').value);
-            if (isNaN(selectedNumber)) {
-                alert("กรุณากรอกตัวเลขที่ถูกต้อง");
-                return;
-            }
-            let resultHtml = '';
-            const startDate = new Date();
+            const resultDiv = document.getElementById('result');
 
-            for (let i = 0; i < 7; i++) {
-                const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + i);
-                
-                const dayNumber = (currentDate.getDay() === 0) ? 0 : currentDate.getDay();
-                const dayOfMonth = currentDate.getDate();
-                let result = selectedNumber + dayOfMonth + (dayNumber + 1); // +1 เพื่อให้วันอาทิตย์เริ่มจาก 1
+            if (dateValue && !isNaN(selectedNumber)) {
+                const selectedDate = new Date(dateValue);
+                let resultHtml = '';
 
-                // เก็บผลลัพธ์แรก
-                const firstResult = result;
+                for (let i = 0; i < 7; i++) {
+                    const currentDate = new Date(selectedDate);
+                    currentDate.setDate(selectedDate.getDate() + i);
+                    
+                    const dayNumber = currentDate.getDay(); // วันอาทิตย์ = 0
+                    const dayOfMonth = currentDate.getDate();
+                    let result = selectedNumber + dayOfMonth + (dayNumber + 1); // +1 เพื่อให้วันอาทิตย์เริ่มจาก 1
 
-                // ลดผลลัพธ์แรกเป็นหลักเดียวถ้าเป็นเลขสองหลัก
-                while (result >= 10) {
-                    result = result.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                    // เก็บผลลัพธ์แรก
+                    const firstResult = result;
+
+                    // ลดผลลัพธ์แรกเป็นหลักเดียวถ้าเป็นเลขสองหลัก
+                    while (result >= 10) {
+                        result = result.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+                    }
+
+                    // จัดการการแสดงผล
+                    const formattedFirstResult = (firstResult === 13 || firstResult === 31) 
+                        ? `<span class="highlight">${firstResult}</span>` 
+                        : firstResult;
+
+                    resultHtml += `วัน ${dayNames[dayNumber]} ${currentDate.toLocaleDateString('th-TH')} : <span class="bold">${formattedFirstResult} | ${result}</span><br>`;
                 }
-
-                // จัดการการแสดงผล
-                const formattedFirstResult = (firstResult === 13 || firstResult === 31) 
-                    ? `<span class="highlight">${firstResult}</span>` 
-                    : firstResult;
-
-                resultHtml += `วัน ${dayNames[dayNumber]} ${currentDate.toLocaleDateString('th-TH')} : <span class="bold">${formattedFirstResult} | ${result}</span><br>`;
+                
+                resultDiv.innerHTML = resultHtml;
+            } else {
+                resultDiv.innerHTML = "กรุณากรอกวันที่และตัวเลขที่ถูกต้อง";
             }
-
-            document.getElementById('result').innerHTML = resultHtml;
         }
 
         // เพิ่มฟังก์ชันตรวจจับการกดปุ่ม Enter
@@ -141,6 +136,10 @@
             if (event.key === 'Enter') {
                 calculate();
             }
+        });
+
+        document.getElementById('date').addEventListener('change', function() {
+            calculate();
         });
     </script>
 
